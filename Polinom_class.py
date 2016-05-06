@@ -9,10 +9,11 @@ class Polinom():
         self.pol_int = int(pol_value,2)
 
     def getter(self):
-        return self.pol_value
+        return self.pol_value, self.pol_int
 
     def setter(self,value):
         self.pol_value = value
+        self.pol_int = int(value,2)
 
     def __mul__(self, other):
         bitsa = reversed("{0:b}".format(self.pol_int))
