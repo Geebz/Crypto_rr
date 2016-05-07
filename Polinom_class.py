@@ -1,6 +1,6 @@
 class Polinom(int):
-    generator = 0b1000100000001010
-    power=16
+    generator = 0b10001000000001011
+    power = 16
 
     def __xor__(self, other):
         return Polinom(super(Polinom, self).__xor__(other))
@@ -22,8 +22,8 @@ class Polinom(int):
 
     def __mod__(self, other):
         deg = self.degree
-        pol=self
-        while deg>=self.power:
+        pol = self
+        while deg >= self.power:
             pol = pol ^ (other << (deg - self.power))
             deg = pol.degree
         return Polinom(pol)
@@ -33,13 +33,7 @@ class Polinom(int):
         c = self
         m = reversed(Polinom(power).make_file())
         for bit in m:
-            if bit:
+            if int(bit):
                 b = (b*c) % self.generator
             c = (c*c) % self.generator
         return Polinom(b)
-
-
-var1=Polinom(2)
-var2=Polinom(2)
-print (var1**8).make_file()
-# print (var1**15).make_file()
