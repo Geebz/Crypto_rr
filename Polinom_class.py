@@ -1,45 +1,45 @@
-class Polinom():
-    generator = int('1000100000001010',2)
-    power=4
-    pol_value = 0
-    pol_int = 0
+class Polinom(int):
+    generator = 0b1000100000001010
+    power=16
 
-    def __init__(self,pol_value):
-        self.pol_value = pol_value
-        self.pol_int = int(pol_value,2)
+    def __xor__(self, other):
+        return Polinom(super(Polinom, self).__xor__(other))
 
-    def getter(self):
-        return self.pol_value, self.pol_int
+    def __add__(self, other):
+        return Polinom(self^other)
 
-    def setter(self,value):
-        self.pol_value = value
-        self.pol_int = int(value,2)
+    @property
+    def degree(self):
+        return len(bin(self)) - 3
+
+    def make_file(self):
+        return bin(self)[2:]
 
     def __mul__(self, other):
-        bitsa = reversed("{0:b}".format(self.pol_int))
-        g = [(other.pol_int << i) * int(bit) for i, bit in enumerate(bitsa)]
-        return reduce(lambda x, y: x ^ y, g)
+        bitsa = reversed("{0:b}".format(self))
+        g = [(other<< i) * int(bit) for i, bit in enumerate(bitsa)]
+        return Polinom(reduce(lambda x, y: x ^ y, g))
 
     def __mod__(self, other):
-        deg = self.pol_value[::-1].rfind('1')+1
-        if deg>=self.power:
-            pol = self.pol_int
+        deg = self.degree
+        pol=self
+        while deg>=self.power:
             pol = pol ^ (other << (deg - self.power))
-        else:
-            raise Exception
-        return pol
+            deg = pol.degree
+        return Polinom(pol)
 
     def __pow__(self, power):
-        b=1
-        c = self.pol_int
-        m = bin(power)[2:][::-1]
-        for i,n in enumerate(m):
-            if m[i] == '1':
+        b=Polinom(1)
+        c = self
+        m = reversed(Polinom(power).make_file())
+        for bit in m:
+            if bit:
                 b = (b*c) % self.generator
             c = (c*c) % self.generator
-        return b
+        return Polinom(b)
 
 
-var1=Polinom('10')
-
-print var1**7
+var1=Polinom(2)
+var2=Polinom(2)
+print (var1**8).make_file()
+# print (var1**15).make_file()
