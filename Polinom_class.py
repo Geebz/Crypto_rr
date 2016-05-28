@@ -5,6 +5,9 @@ class Polinom(int):
     def __xor__(self, other):
         return Polinom(super(Polinom, self).__xor__(other))
 
+    def __and__(self, other):
+        return Polinom(super(Polinom,self).__and__(other))
+
     def __add__(self, other):
         return Polinom(self^other)
 
