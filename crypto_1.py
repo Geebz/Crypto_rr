@@ -2,7 +2,6 @@
 
 from Polinom_class import Polinom
 from feature import Profiler
-from functools import partial
 from multiprocessing import Pool, cpu_count
 
 
@@ -21,7 +20,7 @@ def scalar_mul(a,b):
 def uolsh_adamar(array):
     walsh_ranges = []
     for func in array:
-        init = [(-1)**int(i, 2) for i in func]
+        init = [(-1)**i for i in func]
         for i in range(Polinom.power):
             used = set()
             for num in range(2 ** Polinom.power):
@@ -124,18 +123,19 @@ def avalanche_effect(array):
     else:
         print 'F avg. avelanche effect True'
 
-def get_mdp(truth_table):
-    def _get_mdp(truth_table, a):
-        b = [0] * (2 ** Polinom.power)
-        for x in range(2 ** Polinom.power):
-            b[truth_table[x] ^ truth_table[x ^ a]] += 1
-        return max(b)
 
+def _get_mdp(a):
+    b = [0] * (2 ** Polinom.power)
+    for x in range(2 ** Polinom.power):
+        b[truth_table[x] ^ truth_table[x ^ a]] += 1
+    return max(b)
+
+def mdp():
     chunk_size = cpu_count() - 1
-
     processes = Pool(chunk_size)
-    MDPes = processes.map(partial(_get_mdp, truth_table),
-                          range(1, 2 ** Polinom.power))
+    gf = truth_table[1:]
+
+    MDPes = processes.map(_get_mdp,gf)
 
     return '{}/2^{}'.format(max(MDPes), Polinom.power)
 
@@ -147,11 +147,10 @@ with Profiler() as p:
     b = ["{0:016b}".format(i) for i in truth_table]
     # #
     c = kord_func(b)
-    # uolsh = uolsh_adamar(c)
+    uolsh = uolsh_adamar(c)
     # disb = disbalance(uolsh)
     # kor_imun = k_balance(uolsh)
     # non = nonlinearity(uolsh)
     # b = error_propagation(c)
     # avalanche_effect(b)
-
-    print get_mdp(truth_table)
+    print mdp()
