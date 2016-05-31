@@ -14,9 +14,6 @@ def kord_func(array):
         A.append(new_array)
     return A
 
-def scalar_mul(a,b):
-    return sum(int(bit) for bit in bin(a & b)[2:])
-
 def uolsh_adamar(array):
     walsh_ranges = []
     for func in array:
@@ -80,6 +77,29 @@ def koef_error_propagation(array):
         func_array.append(vec_i_array)
     return func_array
 
+def error_propagation_bool(array):
+    error_array = []
+    for i in range(Polinom.power):
+        i_arr = []
+        for elem in range(2 ** Polinom.power):
+            a = array[elem]
+            xe = elem ^ (1 << Polinom.power - 1 - i)
+            b = array[xe]
+            value = a ^ b
+            wt = bin(value)[2:].count('1')
+            i_arr.append(wt)
+        sum_i_arr = sum(i_arr)
+        error_array.append(sum_i_arr)
+    return error_array
+
+def koef_error_bool(array):
+    vec_i_array = []
+    for vec_i in range(Polinom.power):
+        value = abs(array[vec_i] - Polinom.power * (2 ** (Polinom.power - 1))) / \
+                float(Polinom.power * (2 ** (Polinom.power - 1)))
+        vec_i_array.append(value)
+    return vec_i_array
+
 def Alg_degree(truth_table):
     F_degree = 0
     result = ''
@@ -103,41 +123,34 @@ def Alg_degree(truth_table):
     result += 'F = {}'.format(F_degree)
     return result
 
-def avalanche_effect(array):
-    g=0
-    f=0
+def avalanche_effect(array,bool_array):
+
     for num,func in enumerate(array):
         for elem in func:
             if elem != 2**(Polinom.power-1):
-                f=f+1
-                if elem!=Polinom.power * 2**(Polinom.power-1):
-                    g=g+1
-                    break
-    if f>0:
-        print 'F avelanche effect False'
-    else:
-        print 'F avelanche effect True'
+                print 'f {} avelanche effect False'.format(num)
+                break
 
-    if g>0:
-        print 'F avg. avelanche effect False'
-    else:
-        print 'F avg. avelanche effect True'
+    for num,elem in enumerate(bool_array):
+        if elem != Polinom.power * (2 ** Polinom.power):
+            print 'F avg. avelanche effect False'
 
 
-def _get_mdp(a):
+def get_mdp(a):
     b = [0] * (2 ** Polinom.power)
     for x in range(2 ** Polinom.power):
         b[truth_table[x] ^ truth_table[x ^ a]] += 1
     return max(b)
 
 def mdp():
-    chunk_size = cpu_count() - 1
-    processes = Pool(chunk_size)
+    cpu_size = cpu_count() - 1
+    processes = Pool(cpu_size)
     gf = truth_table[1:]
 
-    MDPes = processes.map(_get_mdp,gf)
+    MDP = processes.map(get_mdp,gf)
 
-    return '{}/2^{}'.format(max(MDPes), Polinom.power)
+    return '{}/2^{}'.format(max(MDP), Polinom.power)
+
 
 with Profiler() as p:
     # f = open('results.txt','r+')
@@ -151,6 +164,7 @@ with Profiler() as p:
     # disb = disbalance(uolsh)
     # kor_imun = k_balance(uolsh)
     # non = nonlinearity(uolsh)
-    # b = error_propagation(c)
+    bi = error_propagation(c)
     # avalanche_effect(b)
-    print mdp()
+    # print mdp()
+    k = error_propagation_bool(truth_table)
