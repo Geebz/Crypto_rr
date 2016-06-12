@@ -1,6 +1,7 @@
 class Polinom(int):
     generator = 0b10001000000001011
     power = 16
+    # power=15
 
     def __xor__(self, other):
         return Polinom(super(Polinom, self).__xor__(other))
